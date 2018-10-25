@@ -13,7 +13,7 @@ dependencies {
 }
 ```
 
-and enabling `org.radarbase.passive.ppg.PhonePpgProvider`.
+and enabling `org.radarbase.passive.ppg.PhonePpgProvider` in the `device_services_to_connect` Firebase settings.
 
 ## Configuration
 
