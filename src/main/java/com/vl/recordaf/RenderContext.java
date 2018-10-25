@@ -11,6 +11,9 @@ import android.renderscript.Type;
 import android.util.Size;
 import android.view.Surface;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import static android.renderscript.RenderScript.CREATE_FLAG_LOW_POWER;
 import static android.renderscript.RenderScript.ContextType.DEBUG;
 
@@ -20,12 +23,14 @@ import static android.renderscript.RenderScript.ContextType.DEBUG;
  * format.
  */
 class RenderContext {
+    private static final Logger logger = LoggerFactory.getLogger(RenderContext.class);
+
     public static final CountedReleaser RENDER_CONTEXT_RELEASER = new CountedReleaser(() -> {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
+            logger.info("Releasing RenderScript context");
             RenderScript.releaseAllContexts();
         }
     });
-
 
     private final RenderScript rs;
     private final Allocation in;

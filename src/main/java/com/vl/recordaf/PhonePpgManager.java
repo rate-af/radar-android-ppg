@@ -55,7 +55,7 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
     private Handler mProcessor;
     private Semaphore cameraOpenCloseLock = new Semaphore(1);
     private RenderContext mRenderContext;
-    private int measurementTime;
+    private long measurementTime;
 
     /**
      * AppSource manager initialization. After initialization, be sure to call
@@ -92,7 +92,7 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
 
         ppgTopic = createTopic("android_phone_ppg", PhonePpg.class);
 
-        measurementTime = service.getMeasurementTime();
+        measurementTime = TimeUnit.SECONDS.toMillis(service.getMeasurementTime());
         preferredDimensions = service.getMeasurementDimensions();
     }
 
@@ -372,12 +372,12 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
         mHandler.post(() -> doStop = true);
     }
 
-    public synchronized int getMeasurementTime() {
+    public synchronized long getMeasurementTime() {
         return measurementTime;
     }
 
     public synchronized void configure(int measurementTime, Size measurementDimensions) {
-        this.measurementTime = measurementTime;
+        this.measurementTime = TimeUnit.SECONDS.toMillis(measurementTime);
         this.preferredDimensions = measurementDimensions;
     }
 

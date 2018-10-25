@@ -1,5 +1,7 @@
 package com.vl.recordaf;
 
+import android.os.SystemClock;
+
 import org.radarcns.android.device.BaseDeviceState;
 import org.radarcns.android.device.DeviceStatusListener;
 
@@ -13,13 +15,13 @@ public class PhonePpgState extends BaseDeviceState {
     @Override
     public synchronized void setStatus(DeviceStatusListener.Status status) {
         if (getStatus() != CONNECTED && status == CONNECTED) {
-            recordingStarted = System.currentTimeMillis();
+            recordingStarted = SystemClock.elapsedRealtime();
         }
         super.setStatus(status);
     }
 
     public long getRecordingTime() {
-        return System.currentTimeMillis() - recordingStarted;
+        return SystemClock.elapsedRealtime() - recordingStarted;
     }
 
     public OnActionListener getActionListener() {

@@ -16,10 +16,13 @@ import android.widget.Toolbar;
 
 import org.radarcns.android.IRadarBinder;
 import org.radarcns.android.RadarApplication;
+import org.radarcns.android.RadarConfiguration;
 import org.radarcns.android.device.DeviceServiceProvider;
 
 import java.util.Objects;
 
+import static com.vl.recordaf.PhonePpgProvider.PPG_MEASUREMENT_TIME_DEFAULT;
+import static com.vl.recordaf.PhonePpgProvider.PPG_MEASUREMENT_TIME_NAME;
 import static org.radarcns.android.device.DeviceStatusListener.Status.CONNECTED;
 import static org.radarcns.android.device.DeviceStatusListener.Status.DISCONNECTED;
 import static org.radarcns.android.device.DeviceStatusListener.Status.READY;
@@ -58,6 +61,10 @@ public class PhonePpgActivity extends Activity implements Runnable {
         View ml = findViewById(R.id.phonePpgFragmentLayout);
         ml.bringToFront();
 
+        RadarConfiguration config = RadarConfiguration.getInstance();
+        this.<TextView>findViewById(R.id.ppgMainDescription)
+                .setText(getString(R.string.ppgMainDescription,
+                        config.getInt(PPG_MEASUREMENT_TIME_NAME, PPG_MEASUREMENT_TIME_DEFAULT)));
         mTextField = findViewById(R.id.ppgMeasurementStatus);
 
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);

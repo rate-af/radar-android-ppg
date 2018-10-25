@@ -17,7 +17,7 @@ import static android.content.pm.PackageManager.FEATURE_CAMERA_FLASH;
 public class PhonePpgProvider extends DeviceServiceProvider<PhonePpgState> {
     private static final String PREFIX = "com.vl.recordaf.PhonePpgProvider.";
 
-    private static final String PPG_MEASUREMENT_TIME_NAME = "phone_ppg_measurement_seconds";
+    public static final String PPG_MEASUREMENT_TIME_NAME = "phone_ppg_measurement_seconds";
     private static final String PPG_MEASUREMENT_WIDTH_NAME = "phone_ppg_measurement_width";
     private static final String PPG_MEASUREMENT_HEIGHT_NAME = "phone_ppg_measurement_height";
 
@@ -25,7 +25,7 @@ public class PhonePpgProvider extends DeviceServiceProvider<PhonePpgState> {
     public static final String PPG_MEASUREMENT_WIDTH_KEY = PREFIX + PPG_MEASUREMENT_WIDTH_NAME;
     public static final String PPG_MEASUREMENT_HEIGHT_KEY = PREFIX + PPG_MEASUREMENT_HEIGHT_NAME;
 
-    private static final int PPG_MEASUREMENT_TIME_DEFAULT = 60;
+    public static final int PPG_MEASUREMENT_TIME_DEFAULT = 60;
     private static final int PPG_MEASUREMENT_WIDTH_DEFAULT = 200;
     private static final int PPG_MEASUREMENT_HEIGHT_DEFAULT = 200;
 

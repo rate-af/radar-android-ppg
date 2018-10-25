@@ -7,7 +7,7 @@
     in your right hand and your left
     index finger on the camera as shown
     below. The measurement will
-    take about 60 seconds.
+    take about %1$d seconds.
     </string>
     <string name="ppg_not_started">Press start when ready</string>
     <string name="ppg_camera_and_flashlight">Camera and flashlight</string>
