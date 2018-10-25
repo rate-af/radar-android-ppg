@@ -81,7 +81,6 @@ public class PhonePpgActivity extends Activity implements Runnable {
     }
 
     private final ServiceConnection radarServiceConnection = new ServiceConnection() {
-
         @Override
         public void onServiceConnected(ComponentName name, IBinder service) {
             IRadarBinder radarService = (IRadarBinder) service;
@@ -89,12 +88,28 @@ public class PhonePpgActivity extends Activity implements Runnable {
             for (DeviceServiceProvider provider : radarService.getConnections()) {
                 if (provider instanceof PhonePpgProvider) {
                     ppgProvider = (PhonePpgProvider) provider;
+
+                    PhonePpgState state = getState();
+                    if (state != null) {
+                        PhonePpgState.OnStateChangeListener listener = state.getStateChangeListener();
+                        if (listener != null) {
+                            listener.acquire();
+                        }
+                    }
                 }
             }
         }
 
         @Override
         public void onServiceDisconnected(ComponentName name) {
+            PhonePpgState state = getState();
+            if (state != null) {
+                PhonePpgState.OnStateChangeListener listener = state.getStateChangeListener();
+                if (listener != null) {
+                    listener.release();
+                }
+            }
+
             ppgProvider = null;
         }
     };
@@ -102,7 +117,6 @@ public class PhonePpgActivity extends Activity implements Runnable {
     @Override
     protected void onStart() {
         super.onStart();
-
         bindService(new Intent(this, ((RadarApplication)getApplication()).getRadarService()), radarServiceConnection, 0);
     }
 
