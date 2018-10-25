@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.phone.ppg;
+package org.radarbase.passive.ppg;
 
 import android.content.Context;
 import android.graphics.ImageFormat;

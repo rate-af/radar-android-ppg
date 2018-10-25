@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.phone.ppg;
+package org.radarbase.passive.ppg;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -22,9 +22,9 @@ import android.util.Size;
 
 import org.radarcns.android.device.DeviceService;
 
-import static org.radarbase.passive.phone.ppg.PhonePpgProvider.PPG_MEASUREMENT_HEIGHT_KEY;
-import static org.radarbase.passive.phone.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_KEY;
-import static org.radarbase.passive.phone.ppg.PhonePpgProvider.PPG_MEASUREMENT_WIDTH_KEY;
+import static org.radarbase.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_HEIGHT_KEY;
+import static org.radarbase.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_KEY;
+import static org.radarbase.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_WIDTH_KEY;
 
 public class PhonePpgService extends DeviceService<PhonePpgState> {
     private int measurementTime;

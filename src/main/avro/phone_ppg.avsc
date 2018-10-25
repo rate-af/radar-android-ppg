@@ -1,5 +1,5 @@
 {
-    "namespace": "org.radarbase.passive.phone.ppg",
+    "namespace": "org.radarcns.passive.ppg",
     "name": "PhonePpg",
     "type": "record",
     "doc": "PPG collected using a phone camera. This ranges over a sample of the image in a camera preview.",

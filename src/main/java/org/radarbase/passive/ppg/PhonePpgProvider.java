@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.phone.ppg;
+package org.radarbase.passive.ppg;
 
 import android.os.Bundle;
 import android.support.annotation.NonNull;
@@ -31,7 +31,7 @@ import static android.content.pm.PackageManager.FEATURE_CAMERA_FLASH;
 
 @SuppressWarnings("unused")
 public class PhonePpgProvider extends DeviceServiceProvider<PhonePpgState> {
-    private static final String PREFIX = "org.radarbase.passive.phone.ppg.PhonePpgProvider.";
+    private static final String PREFIX = "org.radarbase.passive.ppg.PhonePpgProvider.";
 
     public static final String PPG_MEASUREMENT_TIME_NAME = "phone_ppg_measurement_seconds";
     private static final String PPG_MEASUREMENT_WIDTH_NAME = "phone_ppg_measurement_width";

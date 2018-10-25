@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.phone.ppg;
+package org.radarbase.passive.ppg;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -37,8 +37,8 @@ import org.radarcns.android.device.DeviceServiceProvider;
 
 import java.util.Objects;
 
-import static org.radarbase.passive.phone.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_DEFAULT;
-import static org.radarbase.passive.phone.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_NAME;
+import static org.radarbase.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_DEFAULT;
+import static org.radarbase.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_NAME;
 import static org.radarcns.android.device.DeviceStatusListener.Status.CONNECTED;
 import static org.radarcns.android.device.DeviceStatusListener.Status.DISCONNECTED;
 import static org.radarcns.android.device.DeviceStatusListener.Status.READY;

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.phone.ppg;
+package org.radarbase.passive.ppg;
 
 import android.content.Context;
 import android.hardware.camera2.CameraAccessException;
@@ -36,6 +36,7 @@ import android.util.Size;
 import org.radarcns.android.device.AbstractDeviceManager;
 import org.radarcns.android.device.DeviceStatusListener;
 import org.radarcns.kafka.ObservationKey;
+import org.radarcns.passive.ppg.PhonePpg;
 import org.radarcns.topic.AvroTopic;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -50,7 +51,7 @@ import java.util.concurrent.TimeUnit;
 import static android.hardware.camera2.CameraCharacteristics.LENS_FACING;
 import static android.hardware.camera2.CameraDevice.TEMPLATE_PREVIEW;
 import static android.hardware.camera2.CameraMetadata.LENS_FACING_BACK;
-import static org.radarbase.passive.phone.ppg.RenderContext.RENDER_CONTEXT_RELEASER;
+import static org.radarbase.passive.ppg.RenderContext.RENDER_CONTEXT_RELEASER;
 import static org.radarcns.android.device.DeviceStatusListener.Status.CONNECTED;
 import static org.radarcns.android.device.DeviceStatusListener.Status.CONNECTING;
 import static org.radarcns.android.device.DeviceStatusListener.Status.DISCONNECTED;
