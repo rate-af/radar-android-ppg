@@ -50,14 +50,11 @@ import static org.radarcns.android.device.DeviceStatusListener.Status.DISCONNECT
 public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, PhonePpgState> implements PhonePpgState.OnActionListener {
     private static final Logger logger = LoggerFactory.getLogger(PhonePpgManager.class);
 
-    private static final long TOTAL_TIME = 5_000L;
-    private static final int WIDTH = 200;
-    private static final int HEIGHT = 200;
-
     private final AvroTopic<ObservationKey, PhonePpg> ppgTopic;
     private final CameraManager cameraManager;
     private final HandlerThread mHandlerThread;
     private final HandlerThread mProcessorThread;
+    private Size preferredDimensions;
     private Handler mHandler;
     private CameraDevice mCameraDevice;
     private CameraCaptureSession mPreviewSession;
@@ -65,6 +62,7 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
     private Handler mProcessor;
     private Semaphore cameraOpenCloseLock = new Semaphore(1);
     private RenderContext mRenderContext;
+    private int measurementTime;
 
     /**
      * AppSource manager initialization. After initialization, be sure to call
@@ -88,6 +86,9 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
         mProcessorThread = new HandlerThread("PPG processing");
 
         ppgTopic = createTopic("android_phone_ppg", PhonePpg.class);
+
+        measurementTime = service.getMeasurementTime();
+        preferredDimensions = service.getMeasurementDimensions();
     }
 
     @Override
@@ -100,7 +101,7 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
     }
 
 
-    private boolean openCamera(int width, int height) {
+    private boolean openCamera() {
         try {
             if (!cameraOpenCloseLock.tryAcquire(2500, TimeUnit.MILLISECONDS)) {
                 logger.error("Failed to acquire camera open lock");
@@ -130,7 +131,7 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
                 return false;
             }
 
-            Size videoSize = chooseOptimalSize(sizes, width, height);
+            Size videoSize = chooseOptimalSize(sizes);
 
             mRenderContext = new RenderContext(getService(), videoSize);
             mRenderContext.setImageHandler(this::updatePreview, mProcessor);
@@ -232,7 +233,7 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
     }
 
     private void pollDisconnect() {
-        if (getState().getRecordingTime() > TOTAL_TIME || doStop) {
+        if (getState().getRecordingTime() > getMeasurementTime() || doStop) {
             updateStatus(DISCONNECTED);
         }
     }
@@ -272,12 +273,13 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
         return null;
     }
 
-    private Size chooseOptimalSize(Size[] sizes, long width, long height) {
+    private Size chooseOptimalSize(Size[] sizes) {
         double minDiff = Double.MAX_VALUE;
         Size minSize = null;
+        Size prefSize = getPreferredDimensions();
         for (Size size : sizes) {
-            long wDiff = size.getWidth() - width;
-            long hDiff = size.getHeight() - height;
+            long wDiff = size.getWidth() - prefSize.getWidth();
+            long hDiff = size.getHeight() - prefSize.getHeight();
 
             long curDiff = wDiff * wDiff + hDiff * hDiff;
             if (curDiff < minDiff) {
@@ -327,7 +329,7 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
     public void startCamera() {
         mHandler.post(() -> {
             doStop = false;
-            if (!openCamera(WIDTH, HEIGHT)) {
+            if (!openCamera()) {
                 updateStatus(DISCONNECTED);
             }
         });
@@ -336,6 +338,19 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
     @Override
     public void stopCamera() {
         mHandler.post(() -> doStop = true);
+    }
+
+    public synchronized int getMeasurementTime() {
+        return measurementTime;
+    }
+
+    public synchronized void configure(int measurementTime, Size measurementDimensions) {
+        this.measurementTime = measurementTime;
+        this.preferredDimensions = measurementDimensions;
+    }
+
+    public synchronized Size getPreferredDimensions() {
+        return preferredDimensions;
     }
 
     private static class RenderContext {
