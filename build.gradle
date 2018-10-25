@@ -1,3 +1,19 @@
+/*
+ * Copyright 2018 The Hyve
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ * http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
 buildscript {
     repositories {
         google()
@@ -5,14 +21,15 @@ buildscript {
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
-
-
-        // NOTE: Do not place your application dependencies here; they belong
-        // in the individual module build.gradle files
+        classpath 'com.jfrog.bintray.gradle:gradle-bintray-plugin:1.8.1'
+        classpath 'digital.wup:android-maven-publish:3.6.1'
     }
 }
 
 apply plugin: 'com.android.library'
+apply plugin: 'com.jfrog.bintray'
+apply plugin: 'maven-publish'
+apply plugin: 'digital.wup.android-maven-publish'
 
 android {
     compileSdkVersion 28
@@ -22,7 +39,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 1
-        versionName "0.1.0-SNAPSHOT"
+        versionName "0.1.0"
     }
     lintOptions {
         abortOnError false
@@ -53,6 +70,20 @@ android {
 
 }
 
+//---------------------------------------------------------------------------//
+// Configuration                                                             //
+//---------------------------------------------------------------------------//
+
+group = 'org.radarcns'
+ext.moduleName = 'radar-android-ppg'
+ext.moduleDescription = 'Android app for measuring PPG'
+ext.githubRepoName = 'RATE-AF/radar-android-ppg'
+version = android.defaultConfig.versionName
+
+ext.githubUrl = 'https://github.com/' + githubRepoName + '.git'
+ext.issueUrl = 'https://github.com/' + githubRepoName + '/issues'
+ext.website = 'https://www.birmingham.ac.uk/research/activity/mds/trials/bctu/trials/portfolio-v/RateAF/index.aspx'
+
 repositories {
     google()
     jcenter()
@@ -60,12 +91,127 @@ repositories {
 }
 
 dependencies {
-    api 'org.radarcns:radar-commons-android:0.8.0-SNAPSHOT'
+    api 'org.radarcns:radar-commons-android:0.8.0'
     implementation 'com.android.support:appcompat-v7:28.0.0'
     implementation 'com.android.support:support-v4:28.0.0'
     implementation 'com.android.support:design:28.0.0'
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'
 }
+
+tasks.withType(JavaCompile) {
+    options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
+}
+
+//---------------------------------------------------------------------------//
+// Build system metadata                                                     //
+//---------------------------------------------------------------------------//
+
+ext.sharedManifest = manifest {
+    attributes("Implementation-Title": moduleName,
+            "Implementation-Version": version)
+}
+
+task sourcesJar(type: Jar) {
+    classifier = 'sources'
+    from android.sourceSets.main.java.srcDirs
+    manifest.from sharedManifest
+}
+
+task javadoc(type: Javadoc) {
+    source = android.sourceSets.main.java.srcDirs
+    android.libraryVariants.all { variant ->
+        if (variant.name == 'release') {
+            owner.classpath += variant.javaCompiler.classpath
+        }
+    }
+    classpath += project.files(android.getBootClasspath().join(File.pathSeparator))
+    exclude '**/R.java'
+    exclude '**/BuildConfig.java'
+}
+
+task javadocJar(type: Jar, dependsOn: javadoc) {
+    classifier = 'javadoc'
+    from javadoc.destinationDir
+    manifest.from sharedManifest
+}
+
+publishing {
+    publications {
+        mavenAar(MavenPublication) {
+            from components.android
+            artifact sourcesJar
+            artifact javadocJar
+
+            pom {
+                description = moduleDescription
+                licenses {
+                    license {
+                        name = 'The Apache Software License, Version 2.0'
+                        url = 'http://www.apache.org/licenses/LICENSE-2.0.txt'
+                        distribution = 'repo'
+                    }
+                }
+                developers {
+                    developer {
+                        id = 'blootsvoets'
+                        name = 'Joris Borgdorff'
+                        email = 'joris@thehyve.nl'
+                        organization = 'The Hyve'
+                    }
+                    developer {
+                        id = 'Boomerr'
+                        name = 'Martijn van Ling'
+                        email = 'm.s.vanling@gmail.com'
+                        organization = 'Utrecht University'
+                    }
+                }
+                issueManagement {
+                    system = 'GitHub'
+                    url = githubUrl + '/issues'
+                }
+                organization {
+                    name = 'RADAR-base'
+                    url = website
+                }
+                scm {
+                    connection = 'scm:git:' + githubUrl
+                    url = githubUrl
+                }
+            }
+        }
+
+    }
+}
+
+bintray {
+    user project.hasProperty('bintrayUser') ? project.property('bintrayUser') : System.getenv('BINTRAY_USER')
+    key project.hasProperty('bintrayApiKey') ? project.property('bintrayApiKey') : System.getenv('BINTRAY_API_KEY')
+    override false
+    publications 'mavenAar'
+    pkg {
+        repo = project.group
+        name = moduleName
+        userOrg = 'radar-cns'
+        desc = moduleDescription
+        licenses = ['Apache-2.0']
+        websiteUrl = website
+        issueTrackerUrl = issueUrl
+        vcsUrl = githubUrl
+        githubRepo = githubRepoName
+        githubReleaseNotesFile = 'README.md'
+        version {
+            name = project.version
+            desc = moduleDescription
+            vcsTag = System.getenv('TRAVIS_TAG')
+            released = new Date()
+            gpg {
+                sign = true //Determines whether to GPG sign the files. The default is false
+            }
+        }
+    }
+}
+
+bintrayUpload.dependsOn 'assembleRelease'
 
 wrapper {
     gradleVersion '4.10.2'

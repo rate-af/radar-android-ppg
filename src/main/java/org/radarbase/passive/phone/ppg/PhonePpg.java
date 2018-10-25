@@ -3,7 +3,7 @@
  *
  * DO NOT EDIT DIRECTLY
  */
-package org.radarcns.passive.phone.ppg;
+package org.radarbase.passive.phone.ppg;
 
 import org.apache.avro.specific.SpecificData;
 import org.apache.avro.message.BinaryMessageEncoder;
@@ -14,8 +14,8 @@ import org.apache.avro.message.SchemaStore;
 /** PPG collected using a phone camera. This ranges over a sample of the image in a camera preview. */
 @org.apache.avro.specific.AvroGenerated
 public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implements org.apache.avro.specific.SpecificRecord {
-  private static final long serialVersionUID = 989060821201388219L;
-  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhonePpg\",\"namespace\":\"org.radarcns.passive.phone.ppg\",\"doc\":\"PPG collected using a phone camera. This ranges over a sample of the image in a camera preview.\",\"fields\":[{\"name\":\"time\",\"type\":\"double\",\"doc\":\"Phone time since the Unix Epoch (seconds).\"},{\"name\":\"timeReceived\",\"type\":\"double\",\"doc\":\"Processed time since the Unix Epoch (seconds).\"},{\"name\":\"sampleSize\",\"type\":\"int\",\"doc\":\"Number of pixels that were evaluated to get the current value.\"},{\"name\":\"red\",\"type\":\"float\",\"doc\":\"Red component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).\"},{\"name\":\"green\",\"type\":\"float\",\"doc\":\"Green component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).\"},{\"name\":\"blue\",\"type\":\"float\",\"doc\":\"Blue component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).\"}]}");
+  private static final long serialVersionUID = 4649773065745076475L;
+  public static final org.apache.avro.Schema SCHEMA$ = new org.apache.avro.Schema.Parser().parse("{\"type\":\"record\",\"name\":\"PhonePpg\",\"namespace\":\"org.radarbase.passive.phone.ppg\",\"doc\":\"PPG collected using a phone camera. This ranges over a sample of the image in a camera preview.\",\"fields\":[{\"name\":\"time\",\"type\":\"double\",\"doc\":\"Phone time since the Unix Epoch (seconds).\"},{\"name\":\"timeReceived\",\"type\":\"double\",\"doc\":\"Processed time since the Unix Epoch (seconds).\"},{\"name\":\"sampleSize\",\"type\":\"int\",\"doc\":\"Number of pixels that were evaluated to get the current value.\"},{\"name\":\"red\",\"type\":\"float\",\"doc\":\"Red component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).\"},{\"name\":\"green\",\"type\":\"float\",\"doc\":\"Green component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).\"},{\"name\":\"blue\",\"type\":\"float\",\"doc\":\"Blue component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).\"}]}");
   public static org.apache.avro.Schema getClassSchema() { return SCHEMA$; }
 
   private static SpecificData MODEL$ = new SpecificData();
@@ -224,8 +224,8 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
    * Creates a new PhonePpg RecordBuilder.
    * @return A new PhonePpg RecordBuilder
    */
-  public static org.radarcns.passive.phone.ppg.PhonePpg.Builder newBuilder() {
-    return new org.radarcns.passive.phone.ppg.PhonePpg.Builder();
+  public static org.radarbase.passive.phone.ppg.PhonePpg.Builder newBuilder() {
+    return new org.radarbase.passive.phone.ppg.PhonePpg.Builder();
   }
 
   /**
@@ -233,8 +233,8 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
    * @param other The existing builder to copy.
    * @return A new PhonePpg RecordBuilder
    */
-  public static org.radarcns.passive.phone.ppg.PhonePpg.Builder newBuilder(org.radarcns.passive.phone.ppg.PhonePpg.Builder other) {
-    return new org.radarcns.passive.phone.ppg.PhonePpg.Builder(other);
+  public static org.radarbase.passive.phone.ppg.PhonePpg.Builder newBuilder(org.radarbase.passive.phone.ppg.PhonePpg.Builder other) {
+    return new org.radarbase.passive.phone.ppg.PhonePpg.Builder(other);
   }
 
   /**
@@ -242,8 +242,8 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
    * @param other The existing instance to copy.
    * @return A new PhonePpg RecordBuilder
    */
-  public static org.radarcns.passive.phone.ppg.PhonePpg.Builder newBuilder(org.radarcns.passive.phone.ppg.PhonePpg other) {
-    return new org.radarcns.passive.phone.ppg.PhonePpg.Builder(other);
+  public static org.radarbase.passive.phone.ppg.PhonePpg.Builder newBuilder(org.radarbase.passive.phone.ppg.PhonePpg other) {
+    return new org.radarbase.passive.phone.ppg.PhonePpg.Builder(other);
   }
 
   /**
@@ -274,7 +274,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
      * Creates a Builder by copying an existing Builder.
      * @param other The existing Builder to copy.
      */
-    private Builder(org.radarcns.passive.phone.ppg.PhonePpg.Builder other) {
+    private Builder(org.radarbase.passive.phone.ppg.PhonePpg.Builder other) {
       super(other);
       if (isValidValue(fields()[0], other.time)) {
         this.time = data().deepCopy(fields()[0].schema(), other.time);
@@ -306,7 +306,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
      * Creates a Builder by copying an existing PhonePpg instance
      * @param other The existing instance to copy.
      */
-    private Builder(org.radarcns.passive.phone.ppg.PhonePpg other) {
+    private Builder(org.radarbase.passive.phone.ppg.PhonePpg other) {
             super(SCHEMA$);
       if (isValidValue(fields()[0], other.time)) {
         this.time = data().deepCopy(fields()[0].schema(), other.time);
@@ -349,7 +349,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'time'.
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder setTime(double value) {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder setTime(double value) {
       validate(fields()[0], value);
       this.time = value;
       fieldSetFlags()[0] = true;
@@ -371,7 +371,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * Phone time since the Unix Epoch (seconds).
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder clearTime() {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder clearTime() {
       fieldSetFlags()[0] = false;
       return this;
     }
@@ -391,7 +391,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'timeReceived'.
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder setTimeReceived(double value) {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder setTimeReceived(double value) {
       validate(fields()[1], value);
       this.timeReceived = value;
       fieldSetFlags()[1] = true;
@@ -413,7 +413,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * Processed time since the Unix Epoch (seconds).
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder clearTimeReceived() {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder clearTimeReceived() {
       fieldSetFlags()[1] = false;
       return this;
     }
@@ -433,7 +433,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'sampleSize'.
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder setSampleSize(int value) {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder setSampleSize(int value) {
       validate(fields()[2], value);
       this.sampleSize = value;
       fieldSetFlags()[2] = true;
@@ -455,7 +455,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * Number of pixels that were evaluated to get the current value.
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder clearSampleSize() {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder clearSampleSize() {
       fieldSetFlags()[2] = false;
       return this;
     }
@@ -475,7 +475,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'red'.
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder setRed(float value) {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder setRed(float value) {
       validate(fields()[3], value);
       this.red = value;
       fieldSetFlags()[3] = true;
@@ -497,7 +497,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * Red component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder clearRed() {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder clearRed() {
       fieldSetFlags()[3] = false;
       return this;
     }
@@ -517,7 +517,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'green'.
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder setGreen(float value) {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder setGreen(float value) {
       validate(fields()[4], value);
       this.green = value;
       fieldSetFlags()[4] = true;
@@ -539,7 +539,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * Green component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder clearGreen() {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder clearGreen() {
       fieldSetFlags()[4] = false;
       return this;
     }
@@ -559,7 +559,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * @param value The value of 'blue'.
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder setBlue(float value) {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder setBlue(float value) {
       validate(fields()[5], value);
       this.blue = value;
       fieldSetFlags()[5] = true;
@@ -581,7 +581,7 @@ public class PhonePpg extends org.apache.avro.specific.SpecificRecordBase implem
       * Blue component detected in a sample of the camera preview. The range is 0 (no saturation) to 1 (full saturation).
       * @return This builder.
       */
-    public org.radarcns.passive.phone.ppg.PhonePpg.Builder clearBlue() {
+    public org.radarbase.passive.phone.ppg.PhonePpg.Builder clearBlue() {
       fieldSetFlags()[5] = false;
       return this;
     }
