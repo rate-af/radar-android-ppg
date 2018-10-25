@@ -23,8 +23,8 @@ and enabling `org.radarbase.passive.ppg.PhonePpgProvider` in the `device_service
 | `phone_ppg_measurement_width` | int (px) | 200 | Preferred camera image width to analyze. Increasing this will make analysis slower. |
 | `phone_ppg_measurement_height` | int (px) | 200 | Preferred camera image height to analyze. Increasing this will make analysis slower. |
 
-This produces data to the following Kafka topics (all types are prefixed with the `org.radarcns.passive.phone.ppg` package).
+This produces data to the following Kafka topics:
 
 | Topic | Type |
 | ----- | ---- |
-| `android_phone_ppg` | `PhonePpg` |
+| `android_phone_ppg` | `org.radarcns.passive.ppg.PhonePpg` |
