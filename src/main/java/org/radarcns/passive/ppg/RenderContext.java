@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.ppg;
+package org.radarcns.passive.ppg;
 
 import android.content.Context;
 import android.graphics.ImageFormat;
@@ -29,8 +29,11 @@ import android.view.Surface;
 
 import com.vl.recordaf.ScriptC_yuv2rgb;
 
+import org.radarcns.passive.util.CountedReleaser;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
+
+import java.io.Closeable;
 
 import static android.renderscript.RenderScript.CREATE_FLAG_LOW_POWER;
 import static android.renderscript.RenderScript.ContextType.DEBUG;
@@ -40,10 +43,10 @@ import static android.renderscript.RenderScript.ContextType.DEBUG;
  * This context requires that the camera record image data in {@link ImageFormat#YUV_420_888}
  * format.
  */
-class RenderContext {
+class RenderContext implements Closeable {
     private static final Logger logger = LoggerFactory.getLogger(RenderContext.class);
 
-    public static final CountedReleaser RENDER_CONTEXT_RELEASER = new CountedReleaser(() -> {
+    static final CountedReleaser RENDER_CONTEXT_RELEASER = new CountedReleaser(() -> {
         if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.M) {
             logger.info("Releasing RenderScript context");
             RenderScript.releaseAllContexts();
@@ -90,7 +93,7 @@ class RenderContext {
      * @param listener callback
      * @param handler thread to call the callback on.
      */
-    public void setImageHandler(RgbReceiver listener, Handler handler) {
+    void setImageHandler(RgbReceiver listener, Handler handler) {
         in.setOnBufferAvailableListener(a -> {
             long time = System.currentTimeMillis();
             handler.post(() -> listener.apply(time, getRgb()));
@@ -100,7 +103,7 @@ class RenderContext {
     /**
      * Get surface to write YUV data to.
      */
-    public Surface getSurface() {
+    Surface getSurface() {
         return in.getSurface();
     }
 

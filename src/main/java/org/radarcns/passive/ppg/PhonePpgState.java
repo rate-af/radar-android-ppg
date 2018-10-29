@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.ppg;
+package org.radarcns.passive.ppg;
 
 import android.os.SystemClock;
 

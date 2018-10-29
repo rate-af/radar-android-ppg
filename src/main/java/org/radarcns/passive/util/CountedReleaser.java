@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.ppg;
+package org.radarcns.passive.util;
 
 /**
  * Counted reference. A callback to release is called whenever should release is true, no leases

@@ -14,7 +14,7 @@
  * limitations under the License.
  */
 
-package org.radarbase.passive.ppg;
+package org.radarcns.passive.ppg;
 
 import android.app.ActionBar;
 import android.app.Activity;
@@ -37,8 +37,8 @@ import org.radarcns.android.device.DeviceServiceProvider;
 
 import java.util.Objects;
 
-import static org.radarbase.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_DEFAULT;
-import static org.radarbase.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_NAME;
+import static org.radarcns.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_DEFAULT;
+import static org.radarcns.passive.ppg.PhonePpgProvider.PPG_MEASUREMENT_TIME_NAME;
 import static org.radarcns.android.device.DeviceStatusListener.Status.CONNECTED;
 import static org.radarcns.android.device.DeviceStatusListener.Status.DISCONNECTED;
 import static org.radarcns.android.device.DeviceStatusListener.Status.READY;
@@ -184,7 +184,8 @@ public class PhonePpgActivity extends Activity implements Runnable {
     public void run() {
         PhonePpgState state = getState();
         if (state != null && state.getStatus() == CONNECTED) {
-            mTextField.setText("Recording " + state.getRecordingTime() / 1000 + " seconds...");
+            mTextField.setText(getString(R.string.ppg_recording_seconds,
+                    (int)(state.getRecordingTime() / 1000)));
             startButton.setText(R.string.ppg_stop);
             wasConnected = true;
         } else if (wasConnected) {
