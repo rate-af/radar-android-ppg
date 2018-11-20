@@ -223,6 +223,9 @@ public class PhonePpgManager extends AbstractDeviceManager<PhonePpgService, Phon
                                         pollDisconnect();
                                     }
                                 }, mHandler);
+                            } catch (IllegalStateException e) {
+                                logger.error("Failed to create capture request", e);
+                                updateStatus(DISCONNECTED);
                             } catch (CameraAccessException e) {
                                 logger.error("Failed to access camera for requesting preview", e);
                                 updateStatus(DISCONNECTED);

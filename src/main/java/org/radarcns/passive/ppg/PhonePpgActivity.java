@@ -77,7 +77,7 @@ public class PhonePpgActivity extends Activity implements Runnable {
         View ml = findViewById(R.id.phonePpgFragmentLayout);
         ml.bringToFront();
 
-        RadarConfiguration config = RadarConfiguration.getInstance();
+        RadarConfiguration config = ((RadarApplication)getApplication()).getConfiguration();
         this.<TextView>findViewById(R.id.ppgMainDescription)
                 .setText(getString(R.string.ppgMainDescription,
                         config.getInt(PPG_MEASUREMENT_TIME_NAME, PPG_MEASUREMENT_TIME_DEFAULT)));
