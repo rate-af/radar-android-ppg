@@ -14,69 +14,62 @@
  * limitations under the License.
  */
 
-package org.radarcns.passive.util;
+package org.radarcns.passive.util
 
 /**
  * Counted reference. A callback to release is called whenever should release is true, no leases
  * are present and the release has not yet occurred.
  */
-public class CountedReleaser {
-    private final Callback callback;
-    private boolean shouldRelease;
-    private boolean isReleased;
-    private int count;
+class CountedReleaser(private val callback: Callback) {
+    private var shouldRelease: Boolean = false
+    private var isReleased: Boolean = true
+    private var count: Int = 0
 
-    public CountedReleaser(Callback callback) {
-        this.callback = callback;
-        shouldRelease = false;
-        isReleased = true;
-        count = 0;
+    @Synchronized
+    fun acquire() {
+        count++
+        isReleased = false
     }
 
-    public synchronized void acquire() {
-        count++;
-        isReleased = false;
-    }
-
-    public void setShouldRelease(boolean shouldRelease) {
-        boolean doRelease;
-        synchronized (this) {
+    fun setShouldRelease(shouldRelease: Boolean) {
+        val doRelease: Boolean
+        synchronized(this) {
             if (this.shouldRelease == shouldRelease) {
-                return;
+                return
             }
-            this.shouldRelease = shouldRelease;
+            this.shouldRelease = shouldRelease
             if (shouldRelease && count == 0 && !isReleased) {
-                isReleased = true;
-                doRelease = true;
+                isReleased = true
+                doRelease = true
             } else {
-                doRelease = false;
+                doRelease = false
             }
         }
 
         if (doRelease) {
-            callback.release();
+            callback.release()
         }
     }
 
-    public void release() {
-        boolean doRelease;
+    fun release() {
+        val doRelease: Boolean
 
-        synchronized (this) {
-            count--;
+        synchronized(this) {
+            count--
             if (count == 0 && shouldRelease) {
-                isReleased = true;
-                doRelease = true;
+                isReleased = true
+                doRelease = true
             } else {
-                doRelease = false;
+                doRelease = false
             }
         }
 
         if (doRelease) {
-            callback.release();
+            callback.release()
         }
     }
 
-    public interface Callback {
-        void release();
+    interface Callback {
+        fun release()
     }
 }
