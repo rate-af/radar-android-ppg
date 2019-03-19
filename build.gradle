@@ -105,7 +105,7 @@ repositories {
 }
 
 dependencies {
-    api "org.jetbrains.kotlin:kotlin-stdlib-jdk7:$kotlin_version"
+    api "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
     api 'org.radarbase:radar-commons-android:0.10.0-SNAPSHOT'
     api 'org.radarcns:radar-schemas-commons:0.4.3'
     implementation 'androidx.appcompat:appcompat:1.0.2'
