@@ -32,16 +32,17 @@ import androidx.appcompat.widget.Toolbar
 import org.radarbase.android.IRadarBinder
 import org.radarbase.android.RadarApplication
 import org.radarbase.android.device.DeviceStatusListener.Status.*
+import org.radarbase.android.radarApp
 import org.radarcns.passive.ppg.PhonePpgService.Companion.PPG_MEASUREMENT_TIME_DEFAULT
 import org.radarcns.passive.ppg.PhonePpgService.Companion.PPG_MEASUREMENT_TIME_NAME
 import java.util.*
 
 class PhonePpgActivity : AppCompatActivity(), Runnable {
-    private var mTextField: TextView? = null
+    private lateinit var mTextField: TextView
     private var ppgProvider: PhonePpgProvider? = null
-    private var handler: Handler? = null
-    internal var wasConnected: Boolean = false
-    private var startButton: Button? = null
+    private lateinit var handler: Handler
+    private var wasConnected: Boolean = false
+    private lateinit var startButton: Button
 
     private val state: PhonePpgState?
         get() = if (ppgProvider == null || !ppgProvider!!.connection.hasService()) {
@@ -55,23 +56,13 @@ class PhonePpgActivity : AppCompatActivity(), Runnable {
             for (provider in radarService.connections) {
                 if (provider is PhonePpgProvider) {
                     ppgProvider = provider
-
-                    val state = state
-                    if (state != null) {
-                        val listener = state.stateChangeListener
-                        listener?.acquire()
-                    }
+                    state?.stateChangeListener?.acquire()
                 }
             }
         }
 
         override fun onServiceDisconnected(name: ComponentName) {
-            val state = state
-            if (state != null) {
-                val listener = state.stateChangeListener
-                listener?.release()
-            }
-
+            state?.stateChangeListener?.release()
             ppgProvider = null
         }
     }
@@ -81,7 +72,7 @@ class PhonePpgActivity : AppCompatActivity(), Runnable {
         setContentView(R.layout.phone_ppg_activity)
 
         startButton = findViewById(R.id.startButton)
-        startButton!!.setOnClickListener { v ->
+        startButton.setOnClickListener {
             val deviceData = state ?: return@setOnClickListener
             val actionListener = deviceData.actionListener ?: return@setOnClickListener
             if (deviceData.status == DISCONNECTED || deviceData.status == READY) {
@@ -119,12 +110,12 @@ class PhonePpgActivity : AppCompatActivity(), Runnable {
 
     override fun onResume() {
         super.onResume()
-        handler!!.postDelayed(this, 50)
+        handler.postDelayed(this, 50)
     }
 
     override fun onPause() {
         super.onPause()
-        handler!!.removeCallbacks(this)
+        handler.removeCallbacks(this)
     }
 
     override fun onStop() {
@@ -138,8 +129,9 @@ class PhonePpgActivity : AppCompatActivity(), Runnable {
     }
 
     override fun onBackPressed() {
-        startActivity(Intent(this, (application as RadarApplication).mainActivity)
-                .addFlags(Intent.FLAG_ACTIVITY_NO_ANIMATION))
+        startActivity(Intent(this, radarApp.mainActivity).apply {
+            flags += Intent.FLAG_ACTIVITY_NO_ANIMATION
+        })
         overridePendingTransition(0, 0)
         finish()
     }
@@ -147,17 +139,17 @@ class PhonePpgActivity : AppCompatActivity(), Runnable {
     override fun run() {
         val state = state
         if (state != null && state.status == CONNECTED) {
-            mTextField!!.text = getString(R.string.ppg_recording_seconds,
+            mTextField.text = getString(R.string.ppg_recording_seconds,
                     (state.recordingTime / 1000).toInt())
-            startButton!!.setText(R.string.ppg_stop)
+            startButton.setText(R.string.ppg_stop)
             wasConnected = true
         } else if (wasConnected) {
-            mTextField!!.setText(R.string.ppg_done)
-            startButton!!.setText(R.string.start)
+            mTextField.setText(R.string.ppg_done)
+            startButton.setText(R.string.start)
         } else {
-            mTextField!!.setText(R.string.ppg_not_started)
-            startButton!!.setText(R.string.start)
+            mTextField.setText(R.string.ppg_not_started)
+            startButton.setText(R.string.start)
         }
-        handler!!.postDelayed(this, 50)
+        handler.postDelayed(this, 50)
     }
 }

@@ -38,9 +38,4 @@ class PhonePpgProvider : DeviceServiceProvider<PhonePpgState>() {
     override val version: String = BuildConfig.VERSION_NAME
 
     override val isDisplayable: Boolean = false
-
-    companion object {
-        const val PRODUCER = "RATE-AF"
-        const val MODEL = "PPG"
-    }
 }

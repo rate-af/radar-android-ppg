@@ -30,7 +30,7 @@ import org.radarbase.android.device.DeviceStatusListener
 import org.radarbase.android.device.DeviceStatusListener.Status.*
 import org.radarbase.android.util.SafeHandler
 import org.radarcns.kafka.ObservationKey
-import org.radarcns.passive.ppg.RenderContext.RENDER_CONTEXT_RELEASER
+import org.radarcns.passive.ppg.RenderContext.Companion.RENDER_CONTEXT_RELEASER
 import org.slf4j.LoggerFactory
 import java.io.IOException
 import java.util.concurrent.Semaphore
@@ -64,11 +64,11 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
 
         state.stateChangeListener = object : PhonePpgState.OnStateChangeListener {
             override fun release() {
-                RENDER_CONTEXT_RELEASER.setShouldRelease(true)
+                RENDER_CONTEXT_RELEASER.release()
             }
 
             override fun acquire() {
-                RENDER_CONTEXT_RELEASER.setShouldRelease(false)
+                RENDER_CONTEXT_RELEASER.acquire()
             }
         }
 
@@ -107,7 +107,7 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
             }
 
             mRenderContext = RenderContext(service, videoSize).apply {
-                setImageHandler({ time, rgba -> updatePreview(time, rgba) }, mProcessor.handler)
+                setImageHandler(mProcessor, this@PhonePpgManager::updatePreview)
             }
 
             updateStatus(CONNECTING)
