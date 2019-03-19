@@ -39,7 +39,7 @@ android {
         minSdkVersion 21
         targetSdkVersion 28
         versionCode 3
-        versionName "0.1.2"
+        versionName "0.2.0-SNAPSHOT"
     }
     lintOptions {
         abortOnError false
@@ -114,7 +114,7 @@ ext.sharedManifest = manifest {
 }
 
 task sourcesJar(type: Jar) {
-    classifier = 'sources'
+    archiveClassifier.set('sources')
     from android.sourceSets.main.java.srcDirs
     manifest.from sharedManifest
 }
@@ -132,7 +132,7 @@ task javadoc(type: Javadoc) {
 }
 
 task javadocJar(type: Jar, dependsOn: javadoc) {
-    classifier = 'javadoc'
+    archiveClassifier.set('javadoc')
     from javadoc.destinationDir
     manifest.from sharedManifest
 }
