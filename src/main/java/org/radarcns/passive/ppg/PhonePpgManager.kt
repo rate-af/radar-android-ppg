@@ -21,9 +21,6 @@ import android.hardware.camera2.*
 import android.hardware.camera2.CameraCharacteristics.LENS_FACING
 import android.hardware.camera2.CameraDevice.TEMPLATE_PREVIEW
 import android.hardware.camera2.CameraMetadata.LENS_FACING_BACK
-import android.os.Build
-import android.os.Handler
-import android.os.HandlerThread
 import android.renderscript.Allocation
 import android.util.Size
 import android.view.Surface
@@ -31,6 +28,7 @@ import org.radarbase.android.data.DataCache
 import org.radarbase.android.device.AbstractDeviceManager
 import org.radarbase.android.device.DeviceStatusListener
 import org.radarbase.android.device.DeviceStatusListener.Status.*
+import org.radarbase.android.util.SafeHandler
 import org.radarcns.kafka.ObservationKey
 import org.radarcns.passive.ppg.RenderContext.RENDER_CONTEXT_RELEASER
 import org.slf4j.LoggerFactory
@@ -46,28 +44,22 @@ import java.util.concurrent.TimeUnit
  */
 class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpgService, PhonePpgState>(service), PhonePpgState.OnActionListener {
     private val ppgTopic: DataCache<ObservationKey, PhoneCameraPpg> = createCache("android_phone_ppg", PhoneCameraPpg::class.java)
-    private val cameraManager: CameraManager? = service.getSystemService(Context.CAMERA_SERVICE) as CameraManager?
-    private val mHandlerThread: HandlerThread
-    private val mProcessorThread: HandlerThread
+    private val cameraManager: CameraManager = service.getSystemService(Context.CAMERA_SERVICE) as CameraManager?
+            ?: throw IllegalStateException("CameraManager not found")
+
     @get:Synchronized
-    private var preferredDimensions: Size? = null
-    private var mHandler: Handler? = null
+    private lateinit var preferredDimensions: Size
+    private val mHandler: SafeHandler
     private var mCameraDevice: CameraDevice? = null
     private var mPreviewSession: CameraCaptureSession? = null
     private var doStop: Boolean = false
-    private var mProcessor: Handler? = null
+    private val mProcessor: SafeHandler
     private val cameraOpenCloseLock = Semaphore(1)
     private var mRenderContext: RenderContext? = null
     @get:Synchronized
-    private var measurementTime: Long = 0
+    private var measurementTime = 60_000L
 
     init {
-        name = Build.MODEL + " PPG"
-
-        if (cameraManager == null) {
-            updateStatus(DISCONNECTED)
-        }
-
         updateStatus(DeviceStatusListener.Status.READY)
 
         state.stateChangeListener = object : PhonePpgState.OnStateChangeListener {
@@ -80,17 +72,15 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
             }
         }
 
-        mHandlerThread = HandlerThread("PPG")
-        mProcessorThread = HandlerThread("PPG processing")
+        mHandler = SafeHandler("PPG", android.os.Process.THREAD_PRIORITY_FOREGROUND)
+        mProcessor = SafeHandler("PPG processing", android.os.Process.THREAD_PRIORITY_FOREGROUND)
     }
 
     override fun start(acceptableIds: Set<String>) {
         register()
         state.actionListener = this
-        mHandlerThread.start()
-        mHandler = Handler(mHandlerThread.looper)
-        mProcessorThread.start()
-        mProcessor = Handler(mProcessorThread.looper)
+        mHandler.start()
+        mProcessor.start()
     }
 
 
@@ -101,7 +91,7 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
                 logger.error("Failed to acquire camera open lock")
                 return false
             }
-            val cameraId = backFacingCamera(cameraManager!!)
+            val cameraId = backFacingCamera(cameraManager)
 
             if (cameraId == null) {
                 logger.error("Cannot get back-facing camera.")
@@ -116,8 +106,9 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
                 return false
             }
 
-            mRenderContext = RenderContext(service, videoSize)
-            mRenderContext!!.setImageHandler({ time, rgba -> this.updatePreview(time, rgba) }, mProcessor)
+            mRenderContext = RenderContext(service, videoSize).apply {
+                setImageHandler({ time, rgba -> updatePreview(time, rgba) }, mProcessor.handler)
+            }
 
             updateStatus(CONNECTING)
 
@@ -139,7 +130,7 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
                     mCameraDevice = null
                     updateStatus(DISCONNECTED)
                 }
-            }, mHandler)
+            }, mHandler.handler)
 
         } catch (e: CameraAccessException) {
             logger.error("Cannot access the camera.", e)
@@ -159,29 +150,26 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
 
     /** Start the preview session. This should only be called once the camera is open.  */
     private fun startPreview() {
-        if (mCameraDevice == null) {
-            return
-        }
+        val camera = mCameraDevice ?: return
+        val context = mRenderContext ?: return
+
         try {
             logger.debug("Starting capture session")
-            mCameraDevice!!.createCaptureSession(listOf<Surface>(mRenderContext!!.surface),
+            camera.createCaptureSession(listOf<Surface>(context.surface),
                     object : CameraCaptureSession.StateCallback() {
                         override fun onConfigured(cameraCaptureSession: CameraCaptureSession) {
-                            if (mCameraDevice == null) {
-                                return
-                            }
                             mPreviewSession = cameraCaptureSession
                             updateStatus(CONNECTED)
                             logger.info("Started PPG capture session")
 
                             try {
                                 // Make a capture request, sending images to the RenderContext and enabling the torch
-                                val requestBuilder = mCameraDevice!!.createCaptureRequest(TEMPLATE_PREVIEW)
-                                requestBuilder.addTarget(mRenderContext!!.surface)
-                                requestBuilder.set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
-                                val captureRequest = requestBuilder.build()
+                                val captureRequest = camera.createCaptureRequest(TEMPLATE_PREVIEW).apply {
+                                    addTarget(context.surface)
+                                    set(CaptureRequest.FLASH_MODE, CaptureRequest.FLASH_MODE_TORCH)
+                                }.build()
 
-                                mPreviewSession!!.setRepeatingRequest(captureRequest, object : CameraCaptureSession.CaptureCallback() {
+                                cameraCaptureSession.setRepeatingRequest(captureRequest, object : CameraCaptureSession.CaptureCallback() {
                                     override fun onCaptureCompleted(session: CameraCaptureSession, request: CaptureRequest, result: TotalCaptureResult) {
                                         logger.debug("Completed a capture")
                                         pollDisconnect()
@@ -190,7 +178,7 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
                                     override fun onCaptureFailed(session: CameraCaptureSession, request: CaptureRequest, failure: CaptureFailure) {
                                         pollDisconnect()
                                     }
-                                }, mHandler)
+                                }, mHandler.handler)
                             } catch (e: IllegalStateException) {
                                 logger.error("Failed to create capture request", e)
                                 updateStatus(DISCONNECTED)
@@ -198,14 +186,13 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
                                 logger.error("Failed to access camera for requesting preview", e)
                                 updateStatus(DISCONNECTED)
                             }
-
                         }
 
                         override fun onConfigureFailed(cameraCaptureSession: CameraCaptureSession) {
                             logger.error("Create capture session failed")
                             updateStatus(DISCONNECTED)
                         }
-                    }, mHandler)
+                    }, mHandler.handler)
         } catch (e: CameraAccessException) {
             logger.error("Failed to access camera to make a preview request", e)
             updateStatus(DISCONNECTED)
@@ -247,11 +234,9 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
         val g = (totalG / range).toFloat()
         val b = (totalB / range).toFloat()
 
-        val timeReceived = System.currentTimeMillis() / 1000.0
-
         logger.debug("Got RGB {} {} {}", r, g, b)
 
-        send(ppgTopic, PhoneCameraPpg(time / 1000.0, timeReceived, sampleSize, r, g, b))
+        send(ppgTopic, PhoneCameraPpg(time / 1000.0, currentTime, sampleSize, r, g, b))
     }
 
     /** Get the first back-facing camera in the list of cameras returned by the camera manager.  */
@@ -272,22 +257,17 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
      */
     @Throws(CameraAccessException::class)
     private fun getImageSize(cameraId: String): Size? {
-        val characteristics = cameraManager!!.getCameraCharacteristics(cameraId)
+        val sizes = cameraManager.getCameraCharacteristics(cameraId)
+                .get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
+                ?.getOutputSizes(Allocation::class.java)
+                ?: emptyArray()
 
-        val map = characteristics.get(CameraCharacteristics.SCALER_STREAM_CONFIGURATION_MAP)
-
-        if (map == null) {
+        return if (sizes.isNotEmpty()) {
+            chooseOptimalSize(sizes)
+        } else {
             updateStatus(DISCONNECTED)
-            return null
+            null
         }
-
-        val sizes = map.getOutputSizes(Allocation::class.java)
-        if (sizes.size == 0) {
-            updateStatus(DISCONNECTED)
-            return null
-        }
-
-        return chooseOptimalSize(sizes)
     }
 
     /**
@@ -295,24 +275,16 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
      * the Euclidian distance metric between possible sizes and the preferred size.
      */
     private fun chooseOptimalSize(sizes: Array<Size>): Size {
-        var minDiff = java.lang.Double.MAX_VALUE
-        var minSize: Size? = null
         val prefSize = preferredDimensions
-        for (size in sizes) {
-            val wDiff = (size.width - prefSize!!.width).toLong()
-            val hDiff = (size.height - prefSize.height).toLong()
 
-            val curDiff = wDiff * wDiff + hDiff * hDiff
-            if (curDiff < minDiff) {
-                minDiff = curDiff.toDouble()
-                minSize = size
-            }
-            logger.debug("Available preview size {}x{}", size.width, size.height)
-        }
+        val minSize = sizes.asSequence().minBy {
+            logger.debug("Available preview size {}x{}", it.width, it.height)
+            val wDiff = (it.width - prefSize.width).toLong()
+            val hDiff = (it.height - prefSize.height).toLong()
 
-        if (minSize == null) {
-            throw IllegalStateException("Optimal image size cannot be determined.")
-        }
+            wDiff * wDiff + hDiff * hDiff
+        } ?: throw IllegalStateException("Optimal image size cannot be determined.")
+
         logger.debug("Chosen preview size {}x{}", minSize.width, minSize.height)
         return minSize
     }
@@ -323,30 +295,23 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
 
         state.actionListener = null
 
-        mHandler!!.post {
+        mHandler.execute {
             doStop = true
-            if (mPreviewSession != null) {
-                mPreviewSession = null
-            }
+            mPreviewSession = null
             mCameraDevice?.close()
 
-            mHandler!!.post {
-                mProcessor!!.post {
-                    if (mRenderContext != null) {
-                        mRenderContext!!.close()
-                        mRenderContext = null
-                    }
+            mHandler.stop {
+                mProcessor.stop {
+                    mRenderContext?.close()
+                    mRenderContext = null
                 }
-                mProcessorThread.quitSafely()
-
-                mHandlerThread.quitSafely()
             }
         }
 
     }
 
     override fun startCamera() {
-        mHandler!!.post {
+        mHandler.execute {
             doStop = false
             if (!openCamera()) {
                 updateStatus(DISCONNECTED)
@@ -355,7 +320,7 @@ class PhonePpgManager(service: PhonePpgService) : AbstractDeviceManager<PhonePpg
     }
 
     override fun stopCamera() {
-        mHandler!!.post { doStop = true }
+        mHandler.execute { doStop = true }
     }
 
     @Synchronized
